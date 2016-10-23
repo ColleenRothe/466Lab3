@@ -88,9 +88,7 @@ class Host:
     # @param dst_addr: destination address for the packet
     # @param data_S: data being transmitted to the network layer
     def udt_send(self, dst_addr, data_S):
-        length = len(data_S)
-        print("Length IS")
-        print(length)
+
         #p = NetworkPacket(dst_addr, 400,1,data_S)
         # print("TESTING FLAG HERE")
         # print(p.flag)
@@ -100,10 +98,11 @@ class Host:
         # print(p.data_S)
         # print("TESTING Address HERE")
         # print(p.dst_addr)
-        if len(data_S) > 45:  # probably better way to grab this, account for the 00002
-            calced = (int)(len(data_S) / 45) + 1  # how many packets you will need (round up)
+
+        if len(data_S) > 20:  # probably better way to grab this, account for the 00002
+            calced = (int)(len(data_S) / 20) + 1  # how many packets you will need (round up)
             start = 0  # index to start grabbing
-            stop = 44  # index to stop grabbing
+            stop = 19  # index to stop grabbing
             data = ''  # save the data string
 
             for i in range(calced):  # for each new packet
@@ -115,21 +114,24 @@ class Host:
 
                     data = data + data_S[j]  # append to string
 
-                # update start and stop
-                start = stop
-                stop = start + 45
 
                 # send packet with data
-                p = NetworkPacket(dst_addr,400,1, data)
+                flag = 1 #all but last have flag = 1
+                if(stop>=len(data_S)):
+                    flag = 0 ## last fragments flag should be a 0
+                p = NetworkPacket(dst_addr, stop, flag, data) ##"stop" is the offset
                 self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
                 print('%s: sending packet "%s"' % (self, p))
+                # update start and stop
+                start = stop
+                stop = start + 20
+
 
         else:  # length not a problem
             print("ELSE")
-            p = NetworkPacket(dst_addr, data_S)
+            p = NetworkPacket(dst_addr, 0, 0, data_S)
             self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
             print('%s: sending packet "%s"' % (self, p))
-
 
     ## receive packet from the network layer
     def udt_receive(self):
