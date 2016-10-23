@@ -133,11 +133,22 @@ class Host:
             self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
             print('%s: sending packet "%s"' % (self, p))
 
-    ## receive packet from the network layer
+    ## receive fragments from the network layer and put them back together into one packet?
     def udt_receive(self):
         pkt_S = self.in_intf_L[0].get()
+        full_data = '' #where to put this?
         if pkt_S is not None:
-            print('%s: received packet "%s"' % (self, pkt_S))
+            #get the flag
+            flag = int(pkt_S[
+                       NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length])
+            #NEED TO ALSO ACCOUNT FOR THE OFFSET #
+            #there are more fragments to come....
+            if(flag == 1):
+                full_data +=pkt_S
+            #last fragment
+            elif (flag == 0):
+                full_data+=pkt_S
+                print('%s: received packet "%s"' % (self, full_data))
 
     ## thread target for the host to keep receiving data
     def run(self):
