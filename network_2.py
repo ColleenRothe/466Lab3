@@ -6,6 +6,11 @@ Created on Oct 12, 2016
 import queue
 import threading
 
+global fragment_list
+fragment_list = []
+
+global blank_count
+blank_count = 0
 
 ## wrapper class for a queue of packets
 class Interface:
@@ -120,6 +125,8 @@ class Host:
                 if(stop>=len(data_S)):
                     flag = 0 ## last fragments flag should be a 0
                 p = NetworkPacket(dst_addr, stop, flag, data) ##"stop" is the offset
+                # print("CHECK THE OFFSET")
+                # print(p.offset)
                 self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
                 print('%s: sending packet "%s"' % (self, p))
                 # update start and stop
@@ -135,20 +142,53 @@ class Host:
 
     ## receive fragments from the network layer and put them back together into one packet?
     def udt_receive(self):
+        print("RECEIVE")
         pkt_S = self.in_intf_L[0].get()
         full_data = '' #where to put this?
-        if pkt_S is not None:
-            #get the flag
-            flag = int(pkt_S[
-                       NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length])
-            #NEED TO ALSO ACCOUNT FOR THE OFFSET #
-            #there are more fragments to come....
-            if(flag == 1):
-                full_data +=pkt_S
-            #last fragment
-            elif (flag == 0):
-                full_data+=pkt_S
-                print('%s: received packet "%s"' % (self, full_data))
+        global fragment_list
+        global blank_count
+        while True:
+            print("WHILE FALSE")
+            if pkt_S is not None:
+                print("NOT NONE")
+                blank_count = 0
+                #Add the packet string to the fragment list
+                fragment_list.append(pkt_S)
+                #get the flag
+                flag = int(pkt_S[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length])
+                print("FLAG IS")
+                print(flag)
+                # #Grab the offset
+                if (flag == 0):
+                    print("YES WE ARE DONE")
+                    #print('%s: received packet "%s"' % (self, full_data))
+                    break
+            else:
+                blank_count+=1
+
+            if blank_count >= 20:
+                break
+        sorted_list = []
+        while len(fragment_list) > 0:
+            print("WHILE WHILE WHILE")
+            smallest = 999999999
+            small_pkt = None
+            for i in fragment_list:
+                offset = int(i[NetworkPacket.dst_addr_S_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length])
+                if offset < smallest:
+                    smallest = offset
+                    small_pkt = i
+            sorted_list.append(small_pkt)
+            fragment_list.remove(small_pkt)
+        result_string = ''
+        for j in sorted_list:
+            message = j[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length  : ]
+            result_string += message
+
+        print('%s: received packet "%s"' % (self, result_string))
+
+
+
 
     ## thread target for the host to keep receiving data
     def run(self):
