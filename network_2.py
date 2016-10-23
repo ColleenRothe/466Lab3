@@ -142,50 +142,36 @@ class Host:
 
     ## receive fragments from the network layer and put them back together into one packet?
     def udt_receive(self):
-        print("RECEIVE")
         pkt_S = self.in_intf_L[0].get()
         full_data = '' #where to put this?
         global fragment_list
         global blank_count
-        while True:
-            print("WHILE FALSE")
-            if pkt_S is not None:
-                print("NOT NONE")
-                blank_count = 0
+
+        if pkt_S is not None:
+            #print("NOT NONE")
                 #Add the packet string to the fragment list
-                fragment_list.append(pkt_S)
+            fragment_list.append(pkt_S)
                 #get the flag
-                flag = int(pkt_S[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length])
-                print("FLAG IS")
-                print(flag)
-                # #Grab the offset
-                if (flag == 0):
-                    print("YES WE ARE DONE")
-                    #print('%s: received packet "%s"' % (self, full_data))
-                    break
-            else:
-                blank_count+=1
+            flag = int(pkt_S[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length])
 
-            if blank_count >= 20:
-                break
-        sorted_list = []
-        while len(fragment_list) > 0:
-            print("WHILE WHILE WHILE")
-            smallest = 999999999
-            small_pkt = None
-            for i in fragment_list:
-                offset = int(i[NetworkPacket.dst_addr_S_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length])
-                if offset < smallest:
-                    smallest = offset
-                    small_pkt = i
-            sorted_list.append(small_pkt)
-            fragment_list.remove(small_pkt)
-        result_string = ''
-        for j in sorted_list:
-            message = j[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length  : ]
-            result_string += message
+            if (flag == 0):
+                sorted_list = []
+                while len(fragment_list) > 0:
+                    smallest = 999999999
+                    small_pkt = None
+                    for i in fragment_list:
+                        offset = int(i[NetworkPacket.dst_addr_S_length: NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length])
+                        if offset < smallest:
+                            smallest = offset
+                            small_pkt = i
+                    sorted_list.append(small_pkt)
+                    fragment_list.remove(small_pkt)
+                result_string = ''
+                for j in sorted_list:
+                    message = j[NetworkPacket.dst_addr_S_length + NetworkPacket.offset_length + NetworkPacket.flag_length  : ]
+                    result_string += message
 
-        print('%s: received packet "%s"' % (self, result_string))
+                print('%s: received packet "%s"' % (self, result_string))
 
 
 
