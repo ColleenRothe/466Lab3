@@ -18,10 +18,25 @@ if __name__ == '__main__':
     # create network nodes
     client = network.Host(1)
     object_L.append(client)
+
     server = network.Host(2)
     object_L.append(server)
+
+    #started to create the new configuration.....
     router_a = network.Router(name='A', intf_count=1, max_queue_size=router_queue_size)
     object_L.append(router_a)
+
+    router_b = network.Router(name='B', intf_count=1, max_queue_size=router_queue_size)
+    object_L.append(router_b)
+
+    router_c = network.Router(name='C', intf_count=1, max_queue_size=router_queue_size)
+    object_L.append(router_c)
+
+    router_d = network.Router(name='D', intf_count=1, max_queue_size=router_queue_size)
+    object_L.append(router_d)
+
+
+
 
     # create a Link Layer to keep track of links between network nodes
     link_layer = link.LinkLayer()
