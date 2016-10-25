@@ -217,6 +217,10 @@ class Router:
 
     ## look through the content of incoming interfaces and forward to
     # appropriate outgoing interfaces
+
+    #For Router A....input interfaces 0,1 to output interfaces 0,1
+    #For others....input interface i (0) to output interface i (0)
+    #Maniuplate this method to look into routing table to decide what output interface to use
     def forward(self):
         for i in range(len(self.in_intf_L)):
             pkt_S = None
