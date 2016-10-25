@@ -96,7 +96,7 @@ class Host:
     ## create a packet and enqueue for transmission
     # @param dst_addr: destination address for the packet
     # @param data_S: data being transmitted to the network layer
-    def udt_send(self, dst_addr, data_S):
+    def udt_send(self,src_addr, dst_addr, data_S):
 
         #p = NetworkPacket(dst_addr, 400,1,data_S)
         # print("TESTING FLAG HERE")
@@ -107,12 +107,14 @@ class Host:
         # print(p.data_S)
         # print("TESTING Address HERE")
         # print(p.dst_addr)
+        source_num = src_addr
 
         if len(data_S) > 20:  # probably better way to grab this, account for the 00002
             calced = (int)(len(data_S) / 20) + 1  # how many packets you will need (round up)
             start = 0  # index to start grabbing
             stop = 19  # index to stop grabbing
             data = ''  # save the data string
+
 
             for i in range(calced):  # for each new packet
                 data = ''  # set string = 0
@@ -128,7 +130,9 @@ class Host:
                 flag = 1 #all but last have flag = 1
                 if(stop>=len(data_S)):
                     flag = 0 ## last fragments flag should be a 0
-                p = NetworkPacket(dst_addr, stop, flag, 0, data) ##"stop" is the offset
+                p = NetworkPacket(dst_addr, stop, flag, source_num, data) ##"stop" is the offset
+                print("SOURCE")
+                print(p.source_addr);
                 # print("CHECK THE OFFSET")
                 # print(p.offset)
                 self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
@@ -140,7 +144,7 @@ class Host:
 
         else:  # length not a problem
             print("ELSE")
-            p = NetworkPacket(dst_addr, 0, 0, 0, data_S)
+            p = NetworkPacket(dst_addr, 0, 0, source_num, data_S)
             self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
             print('%s: sending packet "%s"' % (self, p))
 
@@ -199,9 +203,10 @@ class Router:
     ##@param name: friendly router name for debugging
     # @param intf_count: the number of input and output interfaces
     # @param max_queue_size: max queue length (passed to Interface)
-    def __init__(self, name, intf_count, max_queue_size):
+    def __init__(self, name, intf_count, max_queue_size,table_rule):
         self.stop = False #for thread termination
         self.name = name
+        self.table_rule = table_rule
         #create a list of interfaces
         self.in_intf_L = [Interface(max_queue_size) for _ in range(intf_count)]
         self.out_intf_L = [Interface(max_queue_size) for _ in range(intf_count)]
@@ -221,9 +226,10 @@ class Router:
                 #if packet exists make a forwarding decision
                 if pkt_S is not None:
                     p = NetworkPacket.from_byte_S(pkt_S) #parse a packet out
-                    # HERE you will need to implement a lookup into the
-                    # forwarding table to find the appropriate outgoing interface
-                    # for now we assume the outgoing interface is also i
+                    if self.name is "A":
+                        if p.sourc_addr is self.table_rule:
+                            self.out_intf_L
+
                     self.out_intf_L[i].put(p.to_byte_S(), True)
                     print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, i))
             except queue.Full:
