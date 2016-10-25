@@ -25,6 +25,5 @@ PART 3:
 2) Create routing tables so Host1 and Host2 can send to Host3
 -routing table for each router should be passed into router constructor, should be defined in simulation.py
     -need to modify router class to forward packets correctly between interfaces according to routing tables
-3)Extend NetworkPacket with source address
-
-Forward Packets from Host1 over Router B and from Host2 over Router C!
+3)Extend NetworkPacket with source address: DONE
+4)Forward Packets from Host1 over Router B and from Host2 over Router C
