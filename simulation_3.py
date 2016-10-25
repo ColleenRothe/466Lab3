@@ -30,7 +30,8 @@ if __name__ == '__main__':
     table_rule_c = "2"
     table_rule_d = "2"
 
-    router_a = network.Router(name='A', intf_count=1, max_queue_size=router_queue_size, table_rule=table_rule_a)
+    ##interface count is the number of input and output interfaces (needs to be 2 for A)
+    router_a = network.Router(name='A', intf_count=2, max_queue_size=router_queue_size, table_rule=table_rule_a)
     object_L.append(router_a)
 
     router_b = network.Router(name='B', intf_count=1, max_queue_size=router_queue_size, table_rule=table_rule_b)
