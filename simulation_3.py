@@ -3,7 +3,6 @@ Created on Oct 12, 2016
 
 @author: mwitt_000
 '''
-import queue
 import network
 import link
 import threading
@@ -20,22 +19,27 @@ if __name__ == '__main__':
     client = network.Host(1)
     object_L.append(client)
 
-    server = network.Host(2)
+    server = network.Host(3)
     object_L.append(server)
 
-    other = network.Host(3)
-    object_L.append(other)
+    client2 = network.Host(2)
+    object_L.append(client2)
 
-    router_a = network.Router(name='A', intf_count=1, max_queue_size=router_queue_size)
+    table_rule_a = "1"
+    table_rule_b = "1"
+    table_rule_c = "2"
+    table_rule_d = "2"
+
+    router_a = network.Router(name='A', intf_count=1, max_queue_size=router_queue_size, table_rule=table_rule_a)
     object_L.append(router_a)
 
-    router_b = network.Router(name='B', intf_count=1, max_queue_size=router_queue_size)
+    router_b = network.Router(name='B', intf_count=1, max_queue_size=router_queue_size, table_rule=table_rule_b)
     object_L.append(router_b)
 
-    router_c = network.Router(name='C', intf_count=1, max_queue_size=router_queue_size)
+    router_c = network.Router(name='C', intf_count=1, max_queue_size=router_queue_size,table_rule=table_rule_c)
     object_L.append(router_c)
 
-    router_d = network.Router(name='D', intf_count=1, max_queue_size=router_queue_size)
+    router_d = network.Router(name='D', intf_count=1, max_queue_size=router_queue_size,table_rule=table_rule_d)
     object_L.append(router_d)
 
 
@@ -52,10 +56,10 @@ if __name__ == '__main__':
     link_layer.add_link(link.Link(client, 0, router_a, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_a, 0, router_b, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_b, 0, router_d, 0, 50))  # mtu=50
-    link_layer.add_link(link.Link(router_d, 0, other, 0, 50))  # mtu=50
+    link_layer.add_link(link.Link(router_d, 0, server, 0, 50))  # mtu=50
 
     #bottom path
-    link_layer.add_link(link.Link(server, 0, router_a, 0, 50))  # mtu=50
+    link_layer.add_link(link.Link(client2, 0, router_a, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_a, 0, router_c, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_c, 0, router_d, 0, 50))  # mtu=50
 
@@ -63,7 +67,7 @@ if __name__ == '__main__':
     thread_L = []
     thread_L.append(threading.Thread(name=client.__str__(), target=client.run))
     thread_L.append(threading.Thread(name=server.__str__(), target=server.run))
-    thread_L.append(threading.Thread(name=other.__str__(), target=other.run))
+    thread_L.append(threading.Thread(name=client2.__str__(), target=client2.run))
     thread_L.append(threading.Thread(name=router_a.__str__(), target=router_a.run))
     thread_L.append(threading.Thread(name=router_b.__str__(), target=router_b.run))
     thread_L.append(threading.Thread(name=router_c.__str__(), target=router_c.run))
@@ -78,7 +82,7 @@ if __name__ == '__main__':
         t.start()
 
     # create some send events
-    client.udt_send(2,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.' )
+    client.udt_send(1,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
 
     # give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)
