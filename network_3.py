@@ -228,20 +228,24 @@ class Router:
                 #if packet exists make a forwarding decision
                 if pkt_S is not None:
                     p = NetworkPacket.from_byte_S(pkt_S) #parse a packet out
-                    if len(self.table_rule) is 1:
-                        self.out_intf_L[i].put(p.to_byte_S(), True)
-                        print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, 1))
-                    else:
-                        if p.source_addr is 1:
-                            self.out_intf_L[0].put(p.to_byte_S(), True)
-                            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, 0))
+                    destination = None #holds where the packet should go next
+                    table_source = self.table_rule.get('source') #holds source from routing table
+                    table_source2 = None #holds the possible second source if 2 options
+                    if 'source2' in self.table_rule:
+                        table_source2=self.table_rule.get('source2')
 
-                        elif p.source_addr is 2:
-                            self.out_intf_L[1].put(p.to_byte_S(), True)
-                            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 1, 1))
+                    #if the source address is the first source key
+                    if table_source is p.source_addr:
+                        destination = self.table_rule.get('next')
+                    #if there is a second possible source
+                    elif table_source2 is not None:
+                        #if source address is the second source key
+                        if table_source2 is p.source_addr:
+                            destination = self.table_rule.get('next2')
 
-
-
+                    self.out_intf_L[destination].put(p.to_byte_S(), True)
+                    #how to get the in interface???
+                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, destination))
 
             except queue.Full:
                 print('%s: packet "%s" lost on interface %d' % (self, p, i))
