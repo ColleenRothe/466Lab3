@@ -26,10 +26,10 @@ if __name__ == '__main__':
     object_L.append(client2)
 
     ##if length>1....do stuff. Else that is the destination address
-    table_rule_a = "1B2C"
-    table_rule_b = "D"
-    table_rule_c = "D"
-    table_rule_d = "3"
+    table_rule_a = {'source': 1, 'next': 'B', 'source2':2, 'next2':'C'}
+    table_rule_b = {'source': 1, 'next': 'D'}
+    table_rule_c = {'source': 2, 'next': 'D'}
+    table_rule_d = {'source': 1, 'next': '3', 'source2':2, 'next2':'3'}
 
     ##interface count is the number of input and output interfaces (needs to be 2 for A)?
     router_a = network.Router(name='A', intf_count=2, max_queue_size=router_queue_size, table_rule=table_rule_a)
@@ -58,22 +58,25 @@ if __name__ == '__main__':
     link_layer.add_link(link.Link(client, 0, router_a, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_a, 0, router_b, 0, 50))  # mtu=50
     link_layer.add_link(link.Link(router_b, 0, router_d, 0, 50))  # mtu=50
-    link_layer.add_link(link.Link(router_d, 0, server, 0, 50))  # mtu=50
+
 
     #bottom path
-    link_layer.add_link(link.Link(client2, 0, router_a, 0, 50))  # mtu=50
-    link_layer.add_link(link.Link(router_a, 0, router_c, 0, 50))  # mtu=50
-    link_layer.add_link(link.Link(router_c, 0, router_d, 0, 50))  # mtu=50
+    link_layer.add_link(link.Link(client2, 0, router_a, 1, 50))  # mtu=50
+    link_layer.add_link(link.Link(router_a, 1, router_c, 0, 50))  # mtu=50
+    link_layer.add_link(link.Link(router_c, 0, router_d, 1, 50))  # mtu=50
+    link_layer.add_link(link.Link(router_d, 0, server, 0, 50))  # mtu=50
+
 
     # start all the objects
     thread_L = []
     thread_L.append(threading.Thread(name=client.__str__(), target=client.run))
-    thread_L.append(threading.Thread(name=server.__str__(), target=server.run))
     thread_L.append(threading.Thread(name=client2.__str__(), target=client2.run))
     thread_L.append(threading.Thread(name=router_a.__str__(), target=router_a.run))
     thread_L.append(threading.Thread(name=router_b.__str__(), target=router_b.run))
     thread_L.append(threading.Thread(name=router_c.__str__(), target=router_c.run))
     thread_L.append(threading.Thread(name=router_d.__str__(), target=router_d.run))
+    thread_L.append(threading.Thread(name=server.__str__(), target=server.run))
+
 
 
 
