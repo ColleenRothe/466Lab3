@@ -77,8 +77,6 @@ class NetworkPacket:
         return self(dst_addr, offset, flag, source_addr, data_S)
 
 
-
-
 ## Implements a network host for receiving and transmitting data
 class Host:
 
@@ -98,15 +96,6 @@ class Host:
     # @param data_S: data being transmitted to the network layer
     def udt_send(self,src_addr, dst_addr, data_S):
 
-        #p = NetworkPacket(dst_addr, 400,1,data_S)
-        # print("TESTING FLAG HERE")
-        # print(p.flag)
-        # print("TESTING OFFSET HERE")
-        # print(p.offset)
-        # print("TESTING DATA HERE")
-        # print(p.data_S)
-        # print("TESTING Address HERE")
-        # print(p.dst_addr)
         source_num = src_addr
 
         if len(data_S) > 20:  # probably better way to grab this, account for the 00002
@@ -132,8 +121,6 @@ class Host:
                     flag = 0 ## last fragments flag should be a 0
                 p = NetworkPacket(dst_addr, stop, flag, source_num, data) ##"stop" is the offset
 
-                # print("CHECK THE OFFSET")
-                # print(p.offset)
                 self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
                 print('%s: sending packet "%s"' % (self, p))
                 # update start and stop
@@ -154,7 +141,6 @@ class Host:
         global blank_count
 
         if pkt_S is not None:
-            #print("NOT NONE")
                 #Add the packet string to the fragment list
             fragment_list.append(pkt_S)
                 #get the flag
@@ -178,9 +164,6 @@ class Host:
                     result_string += message
 
                 print('%s: received packet "%s"' % (self, result_string))
-
-
-
 
     ## thread target for the host to keep receiving data
     def run(self):
@@ -216,8 +199,7 @@ class Router:
     ## look through the content of incoming interfaces and forward to
     # appropriate outgoing interfaces
 
-    #For Router A....input interfaces 0,1 to output interfaces 0,1
-    #For others....input interface i (0) to output interface i (0)
+
     #Maniuplate this method to look into routing table to decide what output interface to use
     def forward(self):
         for i in range(len(self.in_intf_L)):
@@ -228,24 +210,24 @@ class Router:
                 #if packet exists make a forwarding decision
                 if pkt_S is not None:
                     p = NetworkPacket.from_byte_S(pkt_S) #parse a packet out
-                    destination = None #holds where the packet should go next
+                    destination = None #holds where the packet should goes out
+                    inI = None #holds where packet goes into
                     table_source = self.table_rule.get('source') #holds source from routing table
                     table_source2 = None #holds the possible second source if 2 options
                     if 'source2' in self.table_rule:
                         table_source2=self.table_rule.get('source2')
-
                     #if the source address is the first source key
                     if table_source is p.source_addr:
                         destination = self.table_rule.get('next')
+                        inI = self.table_rule.get('in')
                     #if there is a second possible source
                     elif table_source2 is not None:
                         #if source address is the second source key
                         if table_source2 is p.source_addr:
                             destination = self.table_rule.get('next2')
-
+                            inI = self.table_rule.get('in2')
                     self.out_intf_L[destination].put(p.to_byte_S(), True)
-                    #how to get the out interface???
-                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, destination, 0))
+                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, destination, inI))
 
             except queue.Full:
                 print('%s: packet "%s" lost on interface %d' % (self, p, i))
