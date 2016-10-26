@@ -244,8 +244,8 @@ class Router:
                             destination = self.table_rule.get('next2')
 
                     self.out_intf_L[destination].put(p.to_byte_S(), True)
-                    #how to get the in interface???
-                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, destination))
+                    #how to get the out interface???
+                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, destination, 0))
 
             except queue.Full:
                 print('%s: packet "%s" lost on interface %d' % (self, p, i))
