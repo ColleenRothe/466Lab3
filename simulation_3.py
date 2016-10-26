@@ -25,12 +25,13 @@ if __name__ == '__main__':
     client2 = network.Host(2)
     object_L.append(client2)
 
-    table_rule_a = "1"
-    table_rule_b = "1"
-    table_rule_c = "2"
-    table_rule_d = "2"
+    ##if length>1....do stuff. Else that is the destination address
+    table_rule_a = "1B2C"
+    table_rule_b = "D"
+    table_rule_c = "D"
+    table_rule_d = "3"
 
-    ##interface count is the number of input and output interfaces (needs to be 2 for A)
+    ##interface count is the number of input and output interfaces (needs to be 2 for A)?
     router_a = network.Router(name='A', intf_count=2, max_queue_size=router_queue_size, table_rule=table_rule_a)
     object_L.append(router_a)
 
@@ -40,7 +41,7 @@ if __name__ == '__main__':
     router_c = network.Router(name='C', intf_count=1, max_queue_size=router_queue_size,table_rule=table_rule_c)
     object_L.append(router_c)
 
-    router_d = network.Router(name='D', intf_count=1, max_queue_size=router_queue_size,table_rule=table_rule_d)
+    router_d = network.Router(name='D', intf_count=2, max_queue_size=router_queue_size,table_rule=table_rule_d)
     object_L.append(router_d)
 
 
@@ -84,6 +85,8 @@ if __name__ == '__main__':
 
     # create some send events
     client.udt_send(1,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
+    #client.udt_send(2,3,'Sitting in the cs lab is the most fun in the world')
+
 
     # give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)
