@@ -131,8 +131,7 @@ class Host:
                 if(stop>=len(data_S)):
                     flag = 0 ## last fragments flag should be a 0
                 p = NetworkPacket(dst_addr, stop, flag, source_num, data) ##"stop" is the offset
-                print("SOURCE")
-                print(p.source_addr);
+
                 # print("CHECK THE OFFSET")
                 # print(p.offset)
                 self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
@@ -143,7 +142,6 @@ class Host:
 
 
         else:  # length not a problem
-            print("ELSE")
             p = NetworkPacket(dst_addr, 0, 0, source_num, data_S)
             self.out_intf_L[0].put(p.to_byte_S())  # send packets always enqueued successfully
             print('%s: sending packet "%s"' % (self, p))
@@ -230,12 +228,21 @@ class Router:
                 #if packet exists make a forwarding decision
                 if pkt_S is not None:
                     p = NetworkPacket.from_byte_S(pkt_S) #parse a packet out
-                    if self.name is "A":
-                        if p.sourc_addr is self.table_rule:
-                            self.out_intf_L
+                    if len(self.table_rule) is 1:
+                        self.out_intf_L[i].put(p.to_byte_S(), True)
+                        print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, 1))
+                    else:
+                        if p.source_addr is 1:
+                            self.out_intf_L[0].put(p.to_byte_S(), True)
+                            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 0, 0))
 
-                    self.out_intf_L[i].put(p.to_byte_S(), True)
-                    print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, i))
+                        elif p.source_addr is 2:
+                            self.out_intf_L[1].put(p.to_byte_S(), True)
+                            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, 1, 1))
+
+
+
+
             except queue.Full:
                 print('%s: packet "%s" lost on interface %d' % (self, p, i))
                 pass
