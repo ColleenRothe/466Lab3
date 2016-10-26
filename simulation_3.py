@@ -25,11 +25,16 @@ if __name__ == '__main__':
     client2 = network.Host(2)
     object_L.append(client2)
 
-    ##if length>1....do stuff. Else that is the destination address
-    table_rule_a = {'source': 1, 'next': 'B', 'source2':2, 'next2':'C'}
-    table_rule_b = {'source': 1, 'next': 'D'}
-    table_rule_c = {'source': 2, 'next': 'D'}
-    table_rule_d = {'source': 1, 'next': '3', 'source2':2, 'next2':'3'}
+    # table_rule_a = {'source': 1, 'next': 'B', 'source2':2, 'next2':'C'}
+    # table_rule_b = {'source': 1, 'next': 'D'}
+    # table_rule_c = {'source': 2, 'next': 'D'}
+    # table_rule_d = {'source': 1, 'next': '3', 'source2':2, 'next2':'3'}
+
+    #next/next2 means go out interface...
+    table_rule_a = {'source': 1, 'next': 0, 'source2': 2, 'next2': 1}
+    table_rule_b = {'source': 1, 'next': 0}
+    table_rule_c = {'source': 2, 'next': 0}
+    table_rule_d = {'source': 1, 'next': 0, 'source2': 2, 'next2': 0} #next2 could be 1?
 
     ##interface count is the number of input and output interfaces (needs to be 2 for A)?
     router_a = network.Router(name='A', intf_count=2, max_queue_size=router_queue_size, table_rule=table_rule_a)
@@ -87,8 +92,8 @@ if __name__ == '__main__':
         t.start()
 
     # create some send events
-    client.udt_send(1,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
-    #client.udt_send(2,3,'Sitting in the cs lab is the most fun in the world')
+    #client.udt_send(1,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
+    client.udt_send(2,3,'Sitting in the cs lab is the most fun in the world')
 
 
     # give the network sufficient time to transfer all packets before quitting
