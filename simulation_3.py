@@ -25,16 +25,11 @@ if __name__ == '__main__':
     client2 = network.Host(2)
     object_L.append(client2)
 
-    # table_rule_a = {'source': 1, 'next': 'B', 'source2':2, 'next2':'C'}
-    # table_rule_b = {'source': 1, 'next': 'D'}
-    # table_rule_c = {'source': 2, 'next': 'D'}
-    # table_rule_d = {'source': 1, 'next': '3', 'source2':2, 'next2':'3'}
-
-    #next/next2 means go out interface...
-    table_rule_a = {'source': 1, 'next': 0, 'source2': 2, 'next2': 1}
-    table_rule_b = {'source': 1, 'next': 0}
-    table_rule_c = {'source': 2, 'next': 0}
-    table_rule_d = {'source': 1, 'next': 0, 'source2': 2, 'next2': 0} #next2 could be 1?
+    #next is the go out interface, in is the in interface it's going to
+    table_rule_a = {'source': 1, 'next': 0, 'in':0, 'source2': 2, 'next2': 1, 'in2':0}
+    table_rule_b = {'source': 1, 'next': 0, 'in':0}
+    table_rule_c = {'source': 2, 'next': 0, 'in':1}
+    table_rule_d = {'source': 1, 'next': 0, 'in':0, 'source2': 2, 'next2': 0, 'in2': 0} #next2 could be 1?
 
     ##interface count is the number of input and output interfaces (needs to be 2 for A)?
     router_a = network.Router(name='A', intf_count=2, max_queue_size=router_queue_size, table_rule=table_rule_a)
@@ -49,10 +44,7 @@ if __name__ == '__main__':
     router_d = network.Router(name='D', intf_count=2, max_queue_size=router_queue_size,table_rule=table_rule_d)
     object_L.append(router_d)
 
-
-
-
-    # create a Link Layer to keep track of links between network nodes
+     # create a Link Layer to keep track of links between network nodes
     link_layer = link.LinkLayer()
     object_L.append(link_layer)
 
@@ -83,17 +75,14 @@ if __name__ == '__main__':
     thread_L.append(threading.Thread(name=server.__str__(), target=server.run))
 
 
-
-
-
     thread_L.append(threading.Thread(name="Network", target=link_layer.run))
 
     for t in thread_L:
         t.start()
 
     # create some send events
-    #client.udt_send(1,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
-    client.udt_send(2,3,'Sitting in the cs lab is the most fun in the world')
+    client2.udt_send(2,3,'We are at Grace Hopper having a super time. It is the best. Gonna stay in Houston for days.')
+    #client.udt_send(1,3,'Sitting in the cs lab is the most fun in the world')
 
 
     # give the network sufficient time to transfer all packets before quitting
@@ -106,7 +95,5 @@ if __name__ == '__main__':
         t.join()
 
     print("All simulation threads joined")
-
-
 
 # writes to host periodically
